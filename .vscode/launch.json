@@ -20,8 +20,8 @@
 				}
 			},
 			"args": [
-				"test.md",
-				"template.html",
+				"test_data/test.md",
+				"test_data/template.html",
 				"out.html",
 			],
 			"cwd": "${workspaceFolder}"
