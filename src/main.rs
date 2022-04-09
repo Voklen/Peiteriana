@@ -1,12 +1,16 @@
 fn main() {
-	use html_editor::{parse, prelude::{Editable, Htmlifiable}, Selector};
-	use markdown::file_to_html;
-	use std::io::Write;
-
 	let args: Vec<String> = std::env::args().collect();
 	let markdown_file = &args[1];
 	let template_file = &args[2];
 	let output_file = &args[3];
+
+	convert(markdown_file, template_file, output_file);
+}
+
+fn convert(markdown_file: &String, template_file: &String, output_file: &String) {
+	use html_editor::{parse, prelude::{Editable, Htmlifiable}, Selector};
+	use markdown::file_to_html;
+	use std::io::Write;
 
 	// Read markdown file and convert to html, then simply read the template html file
 	let markdown_html_contents = file_to_html(std::path::Path::new(markdown_file))
