@@ -8,3 +8,4 @@ edition = "2021"
 [dependencies]
 markdown = "0.3"
 html_editor = "0.4"
+dir-assert = "0.2"

@@ -1,7 +1,7 @@
-Support converting directories of markdown
 Insert markdown file name into html
 Create navigation from file structure (depends on "Support converting directories")
 Insert data into html from markdown comments
 
 Done🎉:
 Handle errors
+Support converting directories of markdown

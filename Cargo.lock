@@ -12,6 +12,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "dir-assert"
+version = "0.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "52079f51e329f84f2895c4752455296d9a2dab76d7af51fc7b026f05889b1899"
+
+[[package]]
 name = "html_editor"
 version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -44,6 +50,7 @@ checksum = "308cc39be01b73d0d18f82a0e7b2a3df85245f84af96fdddc5d202d27e47b86a"
 name = "peiteriana"
 version = "0.1.0"
 dependencies = [
+ "dir-assert",
  "html_editor",
  "markdown",
 ]
