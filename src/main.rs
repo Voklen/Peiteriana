@@ -47,14 +47,18 @@ fn main() {
 }
 
 fn convert_dir(markdown_directory: &str, template_file: &str, output_directory: &str) {
+	use rayon::prelude::*;
 	let markdown_path = PathBuf::from(markdown_directory);
-	for file in files_in_dir_recursively(&markdown_path) {
-		let output_file = match in_to_out_path(&file, markdown_directory, output_directory) {
-			Some(res) => res,
-			None => continue
-		};
-		convert(MyPath::PathBuf(file), template_file, &output_file);
-	}
+
+	// Send each file to convert as a job for the threads 
+	let _: Vec<()> = files_in_dir_recursively(&markdown_path)
+		.into_par_iter()
+		.filter_map(
+			|file| match in_to_out_path(&file, markdown_directory, output_directory) {
+				Some(output_file) => Some(convert(MyPath::PathBuf(file), template_file, &output_file)),
+				None => None // If it's not a markdown file, skip it
+			},
+		).collect(); // Must .collect() because iterator adaptors are lazy and do nothing unless consumed
 }
 
 fn convert(markdown_file: MyPath, template_file: &str, output_file: &str) {

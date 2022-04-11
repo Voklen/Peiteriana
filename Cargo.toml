@@ -8,4 +8,7 @@ edition = "2021"
 [dependencies]
 markdown = "0.3"
 html_editor = "0.4"
+rayon = "1.5"
+
+# For tests:
 dir-assert = "0.2"
