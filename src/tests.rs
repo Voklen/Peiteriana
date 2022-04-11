@@ -26,7 +26,7 @@ mod integration_tests {
 		use std::fs;
 		let markdown_dir = "test_data/dir test input/";
 		let template_file = "test_data/template.html";
-		let output_dir = "test_data/output/dir_integration_test/";
+		let output_dir = "test_data/output/dir_integration_test";
 		let expected_result = "test_data/dir_integration_expected/";
 
 		// Actual test code
