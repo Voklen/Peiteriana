@@ -1,5 +1,9 @@
 #[cfg(test)]
-mod tests;
+#[path ="tests/unit_tests/mod.rs"]
+mod unit;
+#[cfg(test)]
+#[path ="tests/integration.rs"]
+mod integration;
 
 use std::path::PathBuf;
 enum MyPath<'a> {
@@ -53,8 +57,8 @@ fn convert_dir(markdown_directory: &str, template_file: &str, output_directory: 
 	// Send each file to convert as a job for the threads 
 	let _: Vec<()> = files_in_dir_recursively(&markdown_path)
 		.into_par_iter()
-		.filter_map(
-			|file| match in_to_out_path(&file, markdown_directory, output_directory) {
+		.filter_map(|file| 
+			match in_to_out_path(&file, markdown_directory, output_directory) {
 				Some(output_file) => Some(convert(MyPath::PathBuf(file), template_file, &output_file)),
 				None => None // If it's not a markdown file, skip it
 			},
@@ -98,7 +102,7 @@ fn convert(markdown_file: MyPath, template_file: &str, output_file: &str) {
 	}
 }
 
-fn throw_error<T: std::fmt::Display>(action: &str, file: T, err: String) -> (String, Vec<html_editor::Node>, std::fs::File) where { 
+fn throw_error<T: std::fmt::Display>(action: &str, file: T, err: String) -> (String, Vec<html_editor::Node>, std::fs::File) { 
 	// All these return types are just to be able to put it in a unwrap_or_else by just indexing the tuple for the type
 	println!(
 		"{program_name}: Could not {action} file {file}: {error}",
