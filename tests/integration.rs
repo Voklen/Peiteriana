@@ -1,4 +1,4 @@
-use crate::*;
+use peiteriana::*;
 #[test]
 fn integration_test() {
 	// Imports and definitions
