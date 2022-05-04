@@ -1,5 +1,11 @@
 use std::path::PathBuf;
-// See tests for examples of how this works
+
+/// Work out output html file location from the markdown file's and input directory's location 
+/// * file: `input/blog1.md`
+/// * markdown_dir: `input/`
+/// * output_dir: `data/output/`
+/// 
+/// Will return: `data/output/blog1.html`
 pub fn in_to_out_path(file: &PathBuf, markdown_dir: &str, output_dir: &str) -> Option<String> {
 	if file.extension() != Some(std::ffi::OsStr::new("md")) {
 		return None;
@@ -8,15 +14,17 @@ pub fn in_to_out_path(file: &PathBuf, markdown_dir: &str, output_dir: &str) -> O
 	let markdown_dir = with_slash_ending(markdown_dir);
 	let mut output_dir = with_slash_ending(output_dir);
 
-	// WARNING: This should be fine to just return a None to ignore a non-unicode file. 
+	// WARNING: This should be fine to just return a None to ignore a non-unicode file.
 	// But this _could_ result in a bug somewhere so I'm adding this comment to make finding it easier
 	let file = file.to_str()?;
-	
-	// Slices like these can panic because of the varying number of bytes of unicode characters
-	// This should never panic because `markdown_dir` should always be at the start of `file`
-	// If it isn't then something's gone very wrong so we have no idea what state the program's in and so a panic is appropriate
-	let path_relative_to_input_dir = &file[markdown_dir.len()..]; 
-	// add that onto the last section
+
+	/*
+	Slices like these can panic because of the varying number of bytes of unicode characters
+	This should never panic because `markdown_dir` should always be at the start of `file`
+	If it isn't then something's gone very wrong so we have no idea what state the program's in and so a panic is appropriate
+	*/
+	let path_relative_to_input_dir = &file[markdown_dir.len()..];
+
 	output_dir.push_str(path_relative_to_input_dir);
 	Some(output_dir)
 }
