@@ -9,7 +9,7 @@ fn integration_test() {
 	let expected_result = "test_data/expected.html";
 
 	// Actual test code
-	convert(MyPath::Str(markdown_file), template_file, output_file);
+	convert(MyPath::Str(markdown_file), template_file, output_file).unwrap();
 	assert_eq!(
 		fs::read_to_string(output_file).unwrap(),
 		fs::read_to_string(expected_result).unwrap()
@@ -29,7 +29,7 @@ fn dir_integration_test() {
 	let expected_result = "test_data/dir_integration_expected/";
 
 	// Actual test code
-	convert_dir(markdown_dir, template_file, output_dir);
+	convert_dir(markdown_dir, template_file, output_dir).unwrap();
 	assert_paths!(output_dir, expected_result);
 
 	// Clean up after test
