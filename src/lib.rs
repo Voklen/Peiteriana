@@ -10,7 +10,7 @@ impl MyPath<'_> {
 	pub fn to_path(&self) -> PathBuf {
 		match self {
 			MyPath::PathBuf(path) => path.to_owned(),
-			MyPath::Str(str) => PathBuf::from(str)
+			MyPath::Str(str) => PathBuf::from(str),
 		}
 	}
 }
@@ -19,38 +19,68 @@ impl std::fmt::Display for MyPath<'_> {
 	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
 		write!(f, "{}", self)
 	}
-
 }
 
-pub fn convert_dir(markdown_directory: &str, template_file: &str, output_directory: &str) {
+pub struct ThrowError {
+	action: String,
+	file: String,
+	err: String,
+}
+
+impl ThrowError {
+	fn new(one: &str, two: String, three: String) -> Self {
+		ThrowError {
+			action: one.to_owned(),
+			file: two,
+			err: three,
+		}
+	}
+}
+
+pub fn convert_dir(
+	markdown_directory: &str,
+	template_file: &str,
+	output_directory: &str,
+) -> Result<(), ThrowError> {
 	use rayon::prelude::*;
 	let markdown_path = PathBuf::from(markdown_directory);
 
-	// Send each file to convert as a job for the threads 
-	let _: Vec<()> = files_in_dir_recursively(&markdown_path)
+	// Send each file to convert as a job for the threads
+	let yep: Option<ThrowError> = files_in_dir_recursively(&markdown_path)
 		.into_par_iter()
-		.filter_map(|file| 
-			match output_path::in_to_out_path(&file, markdown_directory, output_directory) {
-				Some(output_file) => Some(convert(MyPath::PathBuf(file), template_file, &output_file)),
-				None => None // If it's not a markdown file, skip it
-			},
-		).collect(); // Must .collect() because iterator adaptors are lazy and do nothing unless consumed
+		.find_map_any(|file| {
+			let output_file =
+				output_path::in_to_out_path(&file, markdown_directory, output_directory)?; // If it's not a markdown file, skip it
+			match convert(MyPath::PathBuf(file), template_file, &output_file) {
+				Ok(()) => None,
+				Err(err) => Some(err),
+			}
+		});
+	Ok(())
 }
 
-pub fn convert(markdown_file: MyPath, template_file: &str, output_file: &str) {
-	use html_editor::{parse, prelude::{Editable, Htmlifiable}, Selector};
+pub fn convert(
+	markdown_file: MyPath,
+	template_file: &str,
+	output_file: &str,
+) -> Result<(), ThrowError> {
+	use html_editor::{
+		parse,
+		prelude::{Editable, Htmlifiable},
+		Selector,
+	};
 	use markdown::file_to_html;
 
 	// Read markdown file and convert to html, then simply read the template html file
 	let markdown_html_contents = file_to_html(&markdown_file.to_path())
-		.unwrap_or_else(|err| throw_error("open or parse markdown", markdown_file, err.to_string()).0);
+		.map_err(|err| ThrowError::new("open or parse markdown", markdown_file.to_string(), err.to_string()))?;
 	let template_html_contents = std::fs::read_to_string(template_file)
-		.unwrap_or_else(|err| throw_error("open HTML", template_file, err.to_string()).0);
+		.map_err(|err| ThrowError::new("open HTML", template_file.to_string(), err.to_string()))?;
 
 	let markdown_html = parse(&markdown_html_contents)
 		.expect("The `markdown` and `html_editor` crates seem to have an incompatibility, please report this at https://github.com/Voklen/Peiteriana/issues with the markdown file used");
 	let mut template_html = parse(&template_html_contents)
-		.unwrap_or_else(|err| throw_error("parse", template_file, err).1);
+		.map_err(|err| ThrowError::new("parse", template_file.to_string(), err))?;
 
 	for i in markdown_html {
 		// Loop through every element in the markdown and add it to main
@@ -59,31 +89,31 @@ pub fn convert(markdown_file: MyPath, template_file: &str, output_file: &str) {
 
 	let output_path = PathBuf::from(output_file);
 	if output_path.exists() {
-		std::fs::write(output_file, template_html.trim().html())
-			.unwrap_or_else(|err| {throw_error("write to", output_file, err.to_string());});
+		std::fs::write(output_file, template_html.trim().html()).map_err(|err| {
+			ThrowError::new("write to", output_file.to_string(), err.to_string())
+		})?;
 	} else {
 		match output_path.parent() {
 			Some(parent_dir) => {
-				std::fs::create_dir_all(parent_dir)
-					.unwrap_or_else(|err| {throw_error("create output directory for", output_file, err.to_string());});
-				std::fs::write(output_file, template_html.trim().html())
-					.unwrap_or_else(|err| {throw_error("create or write to", output_file, err.to_string());});
-			},
+				std::fs::create_dir_all(parent_dir).map_err(|err| {
+					ThrowError::new(
+						"create output directory for",
+						output_file.to_string(),
+						err.to_string(),
+					)
+				})?;
+				std::fs::write(output_file, template_html.trim().html()).map_err(|err| {
+					ThrowError::new(
+						"create or write to",
+						output_file.to_string(),
+						err.to_string(),
+					)
+				})?;
+			}
 			None => {}
 		};
-	}
-}
-
-fn throw_error<T: std::fmt::Display>(action: &str, file: T, err: String) -> (String, Vec<html_editor::Node>, std::fs::File) { 
-	// All these return types are just to be able to put it in a unwrap_or_else by just indexing the tuple for the type
-	println!(
-		"{program_name}: Could not {action} file {file}: {error}",
-		program_name = env!("CARGO_PKG_NAME"),
-		action = action,
-		file = file,
-		error = err
-	);
-	std::process::exit(1)
+	};
+	Ok(())
 }
 
 fn files_in_dir_recursively(directory: &PathBuf) -> Vec<PathBuf> {
