@@ -10,7 +10,8 @@ fn main() {
 	let template_is_file = is_file(template_file);
 
 	match (markdown_is_file, template_is_file) {
-		(true, true) => {convert(MyPath::Str(markdown_file), template_file, output_file);},
+		(true, true) => convert(MyPath::Str(markdown_file), template_file, output_file)
+			.unwrap_or_else(|err| println!("{}", err)),
 		(true, false) => {
 			println!(
 				"{}: Cannot have markdown file and template directory",
@@ -18,7 +19,8 @@ fn main() {
 			);
 			std::process::exit(1)
 		}
-		(false, true) => {convert_dir(markdown_file, template_file, output_file);},
+		(false, true) => convert_dir(markdown_file, template_file, output_file)
+			.unwrap_or_else(|err| println!("{}", err)),
 		_ => panic!(),
 	};
 }
@@ -43,18 +45,6 @@ fn is_file(file_as_str: &str) -> bool {
 		"{program_name}: {file}: Could not read file or directory (maybe no read permission for this file?)",
 		program_name = env!("CARGO_PKG_NAME"),
 		file = file_as_str,
-	);
-	std::process::exit(1)
-}
-
-fn throw_error<T: std::fmt::Display>(action: &str, file: T, err: String) -> (String, Vec<html_editor::Node>, std::fs::File) { 
-	// All these return types are just to be able to put it in a unwrap_or_else by just indexing the tuple for the type
-	println!(
-		"{program_name}: Could not {action} file {file}: {error}",
-		program_name = env!("CARGO_PKG_NAME"),
-		action = action,
-		file = file,
-		error = err
 	);
 	std::process::exit(1)
 }
