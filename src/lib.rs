@@ -17,15 +17,18 @@ impl MyPath<'_> {
 
 impl std::fmt::Display for MyPath<'_> {
 	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-		write!(f, "{}", self)
+		match self {
+			Self::PathBuf(x) =>write!(f, "{}", x.display()),
+			Self::Str(as_str) => write!(f, "{}", as_str),
+		}
 	}
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub struct Error {
-	failed_action: String,
-	file: String,
-	error: String,
+	pub failed_action: String,
+	pub file: String,
+	pub error: String,
 }
 
 impl std::fmt::Display for Error {

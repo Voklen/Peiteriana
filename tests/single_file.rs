@@ -1,6 +1,7 @@
 use peiteriana::*;
+
 #[test]
-fn integration_test() {
+fn normal() {
 	// Imports and definitions
 	use std::fs;
 	let markdown_file = "test_data/test.md";
@@ -18,20 +19,17 @@ fn integration_test() {
 	// Clean up after test
 	fs::remove_file(output_file).unwrap();
 }
+
 #[test]
-fn dir_integration_test() {
+fn wrong_markdown_file_name() {
 	// Imports and definitions
-	use dir_assert::assert_paths;
-	use std::fs;
-	let markdown_dir = "test_data/dir test input/";
+	let markdown_file = "test_data/tes.md";
 	let template_file = "test_data/template.html";
-	let output_dir = "test_data/output/dir_integration_test";
-	let expected_result = "test_data/dir_integration_expected/";
+	let output_file = "test_data/output/integration_test.html";
 
 	// Actual test code
-	convert_dir(markdown_dir, template_file, output_dir).unwrap();
-	assert_paths!(output_dir, expected_result);
-
-	// Clean up after test
-	fs::remove_dir_all(output_dir).unwrap();
+	let result = convert(MyPath::Str(markdown_file), template_file, output_file);
+	let err = result.unwrap_err();
+	assert_eq!(err.file, markdown_file);
+	assert_eq!(err.error, "No such file or directory (os error 2)");
 }

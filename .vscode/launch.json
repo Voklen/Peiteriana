@@ -7,6 +7,25 @@
 		{
 			"type": "lldb",
 			"request": "launch",
+			"name": "Debug unit tests in library 'peiteriana'",
+			"cargo": {
+				"args": [
+					"test",
+					"--no-run",
+					"--lib",
+					"--package=peiteriana"
+				],
+				"filter": {
+					"name": "peiteriana",
+					"kind": "lib"
+				}
+			},
+			"args": [],
+			"cwd": "${workspaceFolder}"
+		},
+		{
+			"type": "lldb",
+			"request": "launch",
 			"name": "Debug executable 'peiteriana'",
 			"cargo": {
 				"args": [
@@ -40,6 +59,44 @@
 				"filter": {
 					"name": "peiteriana",
 					"kind": "bin"
+				}
+			},
+			"args": [],
+			"cwd": "${workspaceFolder}"
+		},
+		{
+			"type": "lldb",
+			"request": "launch",
+			"name": "Debug integration test 'single_file'",
+			"cargo": {
+				"args": [
+					"test",
+					"--no-run",
+					"--test=single_file",
+					"--package=peiteriana"
+				],
+				"filter": {
+					"name": "single_file",
+					"kind": "test"
+				}
+			},
+			"args": [],
+			"cwd": "${workspaceFolder}"
+		},
+		{
+			"type": "lldb",
+			"request": "launch",
+			"name": "Debug integration test 'directory'",
+			"cargo": {
+				"args": [
+					"test",
+					"--no-run",
+					"--test=directory",
+					"--package=peiteriana"
+				],
+				"filter": {
+					"name": "directory",
+					"kind": "test"
 				}
 			},
 			"args": [],
